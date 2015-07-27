@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sd_client", "sd_client\sd_client.csproj", "{6284A25E-B6E8-42EF-8FEC-ACAED76BD57B}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "sd_setup", "sd_setup\sd_setup.vdproj", "{26852234-CD46-4382-A7B9-1C25799DC48A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6284A25E-B6E8-42EF-8FEC-ACAED76BD57B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6284A25E-B6E8-42EF-8FEC-ACAED76BD57B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6284A25E-B6E8-42EF-8FEC-ACAED76BD57B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6284A25E-B6E8-42EF-8FEC-ACAED76BD57B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26852234-CD46-4382-A7B9-1C25799DC48A}.Debug|Any CPU.ActiveCfg = Debug
+		{26852234-CD46-4382-A7B9-1C25799DC48A}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

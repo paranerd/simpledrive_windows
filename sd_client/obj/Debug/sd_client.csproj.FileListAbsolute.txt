@@ -1,0 +1,9 @@
+c:\users\paranerd\documents\visual studio 2015\Projects\sd_client\sd_client\bin\Debug\sd_client.exe.config
+c:\users\paranerd\documents\visual studio 2015\Projects\sd_client\sd_client\bin\Debug\sd_client.exe
+c:\users\paranerd\documents\visual studio 2015\Projects\sd_client\sd_client\bin\Debug\sd_client.pdb
+c:\users\paranerd\documents\visual studio 2015\Projects\sd_client\sd_client\obj\Debug\sd_client.csprojResolveAssemblyReference.cache
+c:\users\paranerd\documents\visual studio 2015\Projects\sd_client\sd_client\obj\Debug\sd_client.Form1.resources
+c:\users\paranerd\documents\visual studio 2015\Projects\sd_client\sd_client\obj\Debug\sd_client.Properties.Resources.resources
+c:\users\paranerd\documents\visual studio 2015\Projects\sd_client\sd_client\obj\Debug\sd_client.csproj.GenerateResource.Cache
+c:\users\paranerd\documents\visual studio 2015\Projects\sd_client\sd_client\obj\Debug\sd_client.exe
+c:\users\paranerd\documents\visual studio 2015\Projects\sd_client\sd_client\obj\Debug\sd_client.pdb
