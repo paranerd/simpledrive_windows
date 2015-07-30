@@ -107,7 +107,7 @@
             // 
             // user_input
             // 
-            this.user_input.Location = new System.Drawing.Point(128, 196);
+            this.user_input.Location = new System.Drawing.Point(128, 198);
             this.user_input.Name = "user_input";
             this.user_input.Size = new System.Drawing.Size(196, 26);
             this.user_input.TabIndex = 6;
@@ -151,7 +151,7 @@
             // status
             // 
             this.status.AutoSize = true;
-            this.status.Location = new System.Drawing.Point(13, 363);
+            this.status.Location = new System.Drawing.Point(13, 372);
             this.status.Name = "status";
             this.status.Size = new System.Drawing.Size(0, 20);
             this.status.TabIndex = 11;
@@ -164,26 +164,26 @@
             this.simpleDriveInExplorerToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(279, 94);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(266, 94);
             // 
             // synchronizeNowToolStripMenuItem
             // 
             this.synchronizeNowToolStripMenuItem.Name = "synchronizeNowToolStripMenuItem";
-            this.synchronizeNowToolStripMenuItem.Size = new System.Drawing.Size(278, 30);
+            this.synchronizeNowToolStripMenuItem.Size = new System.Drawing.Size(265, 30);
             this.synchronizeNowToolStripMenuItem.Text = "Synchronize Now";
             this.synchronizeNowToolStripMenuItem.Click += new System.EventHandler(this.synchronizeNowToolStripMenuItem_Click);
             // 
             // simpleDriveInExplorerToolStripMenuItem
             // 
             this.simpleDriveInExplorerToolStripMenuItem.Name = "simpleDriveInExplorerToolStripMenuItem";
-            this.simpleDriveInExplorerToolStripMenuItem.Size = new System.Drawing.Size(278, 30);
+            this.simpleDriveInExplorerToolStripMenuItem.Size = new System.Drawing.Size(265, 30);
             this.simpleDriveInExplorerToolStripMenuItem.Text = "simpleDrive in Explorer";
             this.simpleDriveInExplorerToolStripMenuItem.Click += new System.EventHandler(this.simpleDriveInExplorerToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(278, 30);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(265, 30);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -200,7 +200,7 @@
             this.AcceptButton = this.connect;
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(336, 401);
+            this.ClientSize = new System.Drawing.Size(336, 410);
             this.Controls.Add(this.status);
             this.Controls.Add(this.connect);
             this.Controls.Add(this.browse);

@@ -2,14 +2,12 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
-using System.Diagnostics;
 using System.Web.Script.Serialization;
 using System.Runtime.InteropServices;
 using System.Net;
+using System.Windows.Forms;
 
 namespace sd_client
 {
@@ -19,6 +17,7 @@ namespace sd_client
         public string realpath { get; set; }
         public string type { get; set; }
         public string owner { get; set; }
+        public string action { get; set; }
     }
 
     public class simpledrive
@@ -52,12 +51,14 @@ namespace sd_client
             string[] files = Directory.GetFileSystemEntries(path);
             foreach (string file in files)
             {
-                FileAttributes attr = File.GetAttributes(file);
-                string md5 = ((attr & FileAttributes.Directory) == FileAttributes.Directory) ? "0" : get_md5(file).ToLower();
-                string edit = ((attr & FileAttributes.Directory) == FileAttributes.Directory) ? "0" : "" + (int)File.GetLastWriteTimeUtc(file).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+                string md5 = (Directory.Exists(file)) ? "0" : get_md5(file).ToLower();
+                int access = (Directory.Exists(file)) ? (int)Directory.GetLastAccessTimeUtc(file).Subtract(new DateTime(1970, 1, 1)).TotalSeconds : (int)File.GetLastAccessTimeUtc(file).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+                int edit = (Directory.Exists(file)) ? (int)Directory.GetLastWriteTimeUtc(file).Subtract(new DateTime(1970, 1, 1)).TotalSeconds : (int)File.GetLastWriteTimeUtc(file).Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+                string last = "" + Math.Max(access, edit);
+                string type = (Directory.Exists(file)) ? "folder" : "unknown";
 
-                json += "{\"filename\":\"" + Path.GetFileName(file) + "\",\"realpath\":\"" + path_raw + "\",\"owner\":\"" + username + "\",\"md5\":\"" + md5 + "\",\"edit\":\"" + edit + "\"},";
-                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                json += "{\"filename\":\"" + Path.GetFileName(file) + "\",\"realpath\":\"" + path_raw + "\",\"type\":\"" + type + "\",\"owner\":\"" + username + "\",\"md5\":\"" + md5 + "\",\"edit\":\"" + last + "\"},";
+                if (Directory.Exists(file))
                 {
                     json += list_win_dir(path_raw + Path.GetFileName(file) + "/");
                     continue;
@@ -73,47 +74,67 @@ namespace sd_client
             return json;
         }
 
-        public static async Task sync(string srv, string user, string pass, string folder)
+        public static async Task<string> sync(string srv, string user, string pass, string folder, string lastsync)
         {
             server = srv;
             string success = login(server, user, pass);
-            if (success == "")
+            if (success == "" || success == null)
             {
-                return;
+                return success;
             }
 
             username = user;
             currDir = "{\"filename\":\"\",\"realpath\":\"\",\"type\":\"folder\",\"size\":\"\",\"owner\":\"" + user + "\",\"shareChild\":\"0\",\"hash\":\"0\"}";
-            bool exists = Directory.Exists(folder);
-            if (!exists)
+
+            if (!Directory.Exists(folder))
             {
                 Directory.CreateDirectory(folder);
             }
             userdir = folder;
 
             string all_elem = get_all_elements();
-            string files_to_download = get_files_to_sync(all_elem, "download");
-            string files_to_upload = get_files_to_sync(all_elem, "upload");
+            string files_to_download = get_files_to_sync(all_elem, lastsync);
+
             JavaScriptSerializer ser = new JavaScriptSerializer();
             List<Element> dl_elements = ser.Deserialize<List<Element>>(files_to_download);
             foreach (Element elem in dl_elements)
             {
-                await download(elem);
+                if(elem.action == "download")
+                {
+                    await download(elem);
+                }
+                else if(elem.action == "upload")
+                {
+                    await upload(elem);
+                }
+                else if(elem.action == "delete")
+                {
+                    delete(elem);
+                }
             }
-            List<Element> ul_elements = ser.Deserialize<List<Element>>(files_to_upload);
-            foreach (Element elem in ul_elements)
+
+            return "OK";
+        }
+
+        static void delete(Element element)
+        {
+            string path = userdir + element.realpath + element.filename;
+            if (File.Exists(path))
             {
-                await upload(elem);
+                File.Delete(path);
+            }
+            else if(Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
             }
         }
 
         static async Task upload(Element element)
         {
             string path = userdir + element.realpath + element.filename;
-            FileAttributes attr = File.GetAttributes(path);
-            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+            if (Directory.Exists(path) || !File.Exists(path))
             {
-                // Don't upload empty folders
+                // Don't upload empty folders or try to upload non-existing files
                 return;
             }
             try
@@ -147,6 +168,7 @@ namespace sd_client
 
         public static async Task download(Element element)
         {
+            //MessageBox.Show("Downloading " + element.realpath + element.filename);
             JavaScriptSerializer ser = new JavaScriptSerializer();
             string json = "[" + ser.Serialize(element) + "]";
 
@@ -179,19 +201,17 @@ namespace sd_client
             }
         }
 
-        public static void create_fav_link(string target)
+        public static void create_link(string path, string target)
         {
-            Version vs = Environment.OSVersion.Version;
-            string fav_path = (vs.Major == 6 && vs.Minor == 1 /* Win7 */) ? System.Environment.GetEnvironmentVariable("USERPROFILE") + @"\Favorites\simpleDrive.lnk" : System.Environment.GetEnvironmentVariable("USERPROFILE") + @"\Links\simpleDrive.lnk";
-            if (File.Exists(fav_path))
+            if (File.Exists(path))
             {
-                File.Delete(fav_path);
+                File.Delete(path);
             }
             Type t = Type.GetTypeFromCLSID(new Guid("72C24DD5-D70A-438B-8A42-98424B88AFB8"));
             dynamic shell = Activator.CreateInstance(t);
             try
             {
-                var lnk = shell.CreateShortcut(fav_path);
+                var lnk = shell.CreateShortcut(path);
                 try
                 {
                     lnk.TargetPath = target;
@@ -251,7 +271,7 @@ namespace sd_client
             }
         }
 
-        static string get_files_to_sync(string json, string act)
+        static string get_files_to_sync(string json, string lastsync)
         {
             try
             {
@@ -261,7 +281,7 @@ namespace sd_client
                     { "action", "sync" },
                     { "file", currDir },
                     { "source", json },
-                    { "act", act }
+                    { "lastsync", lastsync }
                 };
 
                 var content = new FormUrlEncodedContent(values);

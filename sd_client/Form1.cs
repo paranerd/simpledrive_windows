@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Configuration;
@@ -26,6 +22,9 @@ namespace sd_client
         public Form1()
         {
             InitializeComponent();
+            Version vs = Environment.OSVersion.Version;
+            string path = Environment.GetEnvironmentVariable("USERPROFILE") + @"\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\simpleDrive.lnk";
+            simpledrive.create_link(path, System.Reflection.Assembly.GetExecutingAssembly().Location);
             notifyIcon1.Text = "simpleDrive Sync Client";
 
             fileMap.ExeConfigFilename = config_path;
@@ -67,7 +66,7 @@ namespace sd_client
                 connect.Text = "Connect";
                 notifyIcon1.BalloonTipText = "Setup your connection";
             }
-            notifyIcon1.ShowBalloonTip(5000);
+            notifyIcon1.ShowBalloonTip(2000);
         }
 
         public async void OnTimer(object sender, System.Timers.ElapsedEventArgs args)
@@ -84,6 +83,7 @@ namespace sd_client
                 if (!File.Exists(config_path))
                 {
                     notifyIcon1.Text = "simpleDrive Sync Client";
+                    sync_in_progress = false;
                     return;
                 }
 
@@ -95,14 +95,28 @@ namespace sd_client
                 {
                     notifyIcon1.Text = "Config not complete";
                     status.Text = "Config not complete";
+                    sync_in_progress = false;
                     return;
                 }
                 if (!Directory.Exists(folder.Value))
                 {
                     notifyIcon1.Text = "Sync folder does not exist";
+                    status.Text = "Sync folder does not exist";
+                    sync_in_progress = false;
+                    return;
                 }
-                await simpledrive.sync(server.Value, user.Value, pass.Value, folder.Value);
-                notifyIcon1.Text = "Last sync " + DateTime.Now.ToString("dd.MM.yyy - hh:mm");
+
+                string lastsync = config.AppSettings.Settings["lastsync"].Value.ToString();
+                string success = await simpledrive.sync(server.Value, user.Value, pass.Value, folder.Value, lastsync);
+                notifyIcon1.Text = (success == "") ? "Login failed" : (success == null) ? "Connection error" : "Last sync " + DateTime.Now.ToString("dd.MM.yyy - hh:mm");
+                if(success != "" && success != null)
+                {
+                    var settings = new Dictionary<string, string>
+                    {
+                        { "lastsync", "" + (int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds}
+                    };
+                    writeSettings(settings);
+                }
                 sync_in_progress = false;
             }
         }
@@ -115,30 +129,23 @@ namespace sd_client
                 config.AppSettings.Settings.Add(entry.Key, entry.Value);
             }
             config.Save(ConfigurationSaveMode.Minimal);
+            //ConfigurationManager.RefreshSection("appSettings");
         }
 
         private void blockText(bool block)
         {
+            BorderStyle style = (block) ? BorderStyle.None : BorderStyle.FixedSingle;
             server_input.ReadOnly = block;
             user_input.ReadOnly = block;
             pass_input.ReadOnly = block;
-            if (block)
-            {
-                server_input.BorderStyle = BorderStyle.None;
-                user_input.BorderStyle = BorderStyle.None;
-                pass_input.BorderStyle = BorderStyle.None;
-            }
-            else
-            {
-                server_input.BorderStyle = BorderStyle.FixedSingle;
-                user_input.BorderStyle = BorderStyle.FixedSingle;
-                pass_input.BorderStyle = BorderStyle.FixedSingle;
-            }
+            server_input.BorderStyle = style;
+            user_input.BorderStyle = style;
+            pass_input.BorderStyle = style;
         }
 
         private void browse_Click(object sender, EventArgs e)
         {
-            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            if (!server_input.ReadOnly && folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
                 userdir = folderBrowserDialog1.SelectedPath;
                 folder_input.Text = new FileInfo(userdir).Name;
@@ -193,7 +200,9 @@ namespace sd_client
                     status.ForeColor = Color.Green;
                     status.Text = "Sync service running...";
                     connect.Text = "Disconnect";
-                    simpledrive.create_fav_link(userdir);
+                    Version vs = Environment.OSVersion.Version;
+                    string path = (vs.Major == 6 && vs.Minor == 1 /* Win7 */) ? System.Environment.GetEnvironmentVariable("USERPROFILE") + @"\Favorites\simpleDrive.lnk" : System.Environment.GetEnvironmentVariable("USERPROFILE") + @"\Links\simpleDrive.lnk";
+                    simpledrive.create_link(path, userdir);
                 }
                 else
                 {
