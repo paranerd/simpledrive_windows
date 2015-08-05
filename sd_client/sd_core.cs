@@ -94,6 +94,7 @@ namespace sd_client
 
             string all_elem = get_all_elements();
             string files_to_download = get_files_to_sync(all_elem, lastsync);
+            //MessageBox.Show("files_to_download: " + files_to_download);
 
             JavaScriptSerializer ser = new JavaScriptSerializer();
             List<Element> dl_elements = ser.Deserialize<List<Element>>(files_to_download);
@@ -112,7 +113,6 @@ namespace sd_client
                     delete(elem);
                 }
             }
-
             return "OK";
         }
 
@@ -144,8 +144,8 @@ namespace sd_client
                 {
                     var values = new[]
                     {
-                        new KeyValuePair<string, string>("dir", currDir),
-                        new KeyValuePair<string, string>("act", "upload"),
+                        new KeyValuePair<string, string>("file", currDir),
+                        new KeyValuePair<string, string>("action", "upload"),
                         new KeyValuePair<string, string>("paths", element.realpath),
                     };
 
@@ -156,7 +156,7 @@ namespace sd_client
 
                     multipartFormDataContent.Add(new ByteArrayContent(File.ReadAllBytes(path)), '"' + "0" + '"', '"' + element.filename + '"');
 
-                    var requestUri = "http://" + server + "/php/files_upload.php";
+                    var requestUri = "http://" + server + "/php/files_api.php";
                     var result = await client.PostAsync(requestUri, multipartFormDataContent);
                 }
             }
@@ -168,7 +168,6 @@ namespace sd_client
 
         public static async Task download(Element element)
         {
-            //MessageBox.Show("Downloading " + element.realpath + element.filename);
             JavaScriptSerializer ser = new JavaScriptSerializer();
             string json = "[" + ser.Serialize(element) + "]";
 

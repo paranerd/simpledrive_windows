@@ -11,10 +11,9 @@ namespace sd_client
 {
     public partial class Form1 : Form
     {
-        static string config_path = Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().Location) + "\\shared.config";
-        static ExeConfigurationFileMap fileMap = new ExeConfigurationFileMap();
-        static Configuration config;
+        static string config_path = System.Reflection.Assembly.GetExecutingAssembly().Location + ".config";
         private static System.Timers.Timer timer = new System.Timers.Timer();
+        private static Properties.Settings settings;
 
         static string userdir = "";
         static bool sync_in_progress = false;
@@ -22,13 +21,12 @@ namespace sd_client
         public Form1()
         {
             InitializeComponent();
+            settings = Properties.Settings.Default;
             Version vs = Environment.OSVersion.Version;
             string path = Environment.GetEnvironmentVariable("USERPROFILE") + @"\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\simpleDrive.lnk";
             simpledrive.create_link(path, System.Reflection.Assembly.GetExecutingAssembly().Location);
             notifyIcon1.Text = "simpleDrive Sync Client";
 
-            fileMap.ExeConfigFilename = config_path;
-            config = ConfigurationManager.OpenMappedExeConfiguration(fileMap, ConfigurationUserLevel.None);
             if (!File.Exists(config_path))
             {
                 status.Text = "Config not found";
@@ -37,11 +35,11 @@ namespace sd_client
             }
 
             // Preset values
-            server_input.Text = (config.AppSettings.Settings["server"] != null) ? config.AppSettings.Settings["server"].Value : "";
-            user_input.Text = (config.AppSettings.Settings["user"] != null) ? config.AppSettings.Settings["user"].Value : "";
-            pass_input.Text = (config.AppSettings.Settings["pass"] != null) ? config.AppSettings.Settings["pass"].Value : "";
-            folder_input.Text = (config.AppSettings.Settings["folder"] != null) ? new FileInfo(config.AppSettings.Settings["folder"].Value).Name : "";
-            userdir = (config.AppSettings.Settings["folder"] != null) ? config.AppSettings.Settings["folder"].Value : "";
+            server_input.Text = (settings.server != "") ? settings.server : "";
+            user_input.Text = (settings.user != "") ? settings.user : "";
+            pass_input.Text = (settings.pass != "") ? settings.pass : "";
+            folder_input.Text = (settings.folder != "") ? new FileInfo(settings.folder).Name : "";
+            userdir = (settings.folder != "") ? settings.folder : "";
 
             timer.Interval = 3000;
             timer.Elapsed += new System.Timers.ElapsedEventHandler(this.OnTimer);
@@ -87,18 +85,20 @@ namespace sd_client
                     return;
                 }
 
-                KeyValueConfigurationElement server = config.AppSettings.Settings["server"];
-                KeyValueConfigurationElement user = config.AppSettings.Settings["user"];
-                KeyValueConfigurationElement pass = config.AppSettings.Settings["pass"];
-                KeyValueConfigurationElement folder = config.AppSettings.Settings["folder"];
-                if (server.Value == null && user.Value == null && pass.Value == null && folder.Value == null)
+                string server = settings.server;
+                string user = settings.user;
+                string pass = settings.pass;
+                string folder = settings.folder;
+
+                if(server == null || user == null || pass == null || folder == null)
                 {
                     notifyIcon1.Text = "Config not complete";
                     status.Text = "Config not complete";
                     sync_in_progress = false;
                     return;
                 }
-                if (!Directory.Exists(folder.Value))
+
+                if (!Directory.Exists(folder))
                 {
                     notifyIcon1.Text = "Sync folder does not exist";
                     status.Text = "Sync folder does not exist";
@@ -106,30 +106,35 @@ namespace sd_client
                     return;
                 }
 
-                string lastsync = config.AppSettings.Settings["lastsync"].Value.ToString();
-                string success = await simpledrive.sync(server.Value, user.Value, pass.Value, folder.Value, lastsync);
+                string lastsync = (settings.lastsync != null) ? settings.lastsync : "0";
+                string success = await simpledrive.sync(server, user, pass, folder, lastsync);
                 notifyIcon1.Text = (success == "") ? "Login failed" : (success == null) ? "Connection error" : "Last sync " + DateTime.Now.ToString("dd.MM.yyy - hh:mm");
-                if(success != "" && success != null)
+                if (success != "" && success != null)
                 {
                     var settings = new Dictionary<string, string>
-                    {
-                        { "lastsync", "" + (int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds}
-                    };
+                     {
+                         { "lastsync", "" + (int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds}
+                     };
                     writeSettings(settings);
                 }
                 sync_in_progress = false;
             }
         }
 
-        private void writeSettings(Dictionary<string, string> settings)
+        private void writeSettings(Dictionary<string, string> keyvalue)
         {
-            foreach (KeyValuePair<string, string> entry in settings)
+            try
             {
-                config.AppSettings.Settings.Remove(entry.Key);
-                config.AppSettings.Settings.Add(entry.Key, entry.Value);
+                foreach (KeyValuePair<string, string> entry in keyvalue)
+                {
+                    settings[entry.Key] = entry.Value;
+                }
+                settings.Save();
             }
-            config.Save(ConfigurationSaveMode.Minimal);
-            //ConfigurationManager.RefreshSection("appSettings");
+            catch (Exception exp)
+            {
+                // Do something
+            }
         }
 
         private void blockText(bool block)
