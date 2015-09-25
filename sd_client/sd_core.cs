@@ -14,7 +14,7 @@ namespace sd_client
     public class Element
     {
         public string filename { get; set; }
-        public string realpath { get; set; }
+        public string parent { get; set; }
         public string type { get; set; }
         public string owner { get; set; }
         public string action { get; set; }
@@ -57,7 +57,7 @@ namespace sd_client
                 string last = "" + Math.Max(access, edit);
                 string type = (Directory.Exists(file)) ? "folder" : "unknown";
 
-                json += "{\"filename\":\"" + Path.GetFileName(file) + "\",\"realpath\":\"" + path_raw + "\",\"type\":\"" + type + "\",\"owner\":\"" + username + "\",\"md5\":\"" + md5 + "\",\"edit\":\"" + last + "\"},";
+                json += "{\"filename\":\"" + Path.GetFileName(file) + "\",\"parent\":\"" + path_raw + "\",\"type\":\"" + type + "\",\"owner\":\"" + username + "\",\"md5\":\"" + md5 + "\",\"edit\":\"" + last + "\"},";
                 if (Directory.Exists(file))
                 {
                     json += list_win_dir(path_raw + Path.GetFileName(file) + "/");
@@ -84,7 +84,7 @@ namespace sd_client
             }
 
             username = user;
-            currDir = "{\"filename\":\"\",\"realpath\":\"\",\"type\":\"folder\",\"size\":\"\",\"owner\":\"" + user + "\",\"shareChild\":\"0\",\"hash\":\"0\"}";
+            currDir = "{\"filename\":\"\",\"parent\":\"\",\"type\":\"folder\",\"size\":\"\",\"owner\":\"" + user + "\",\"rootshare\":\"0\",\"hash\":\"0\"}";
 
             if (!Directory.Exists(folder))
             {
@@ -118,7 +118,7 @@ namespace sd_client
 
         static void delete(Element element)
         {
-            string path = userdir + element.realpath + element.filename;
+            string path = userdir + element.parent + element.filename;
             if (File.Exists(path))
             {
                 File.Delete(path);
@@ -131,7 +131,7 @@ namespace sd_client
 
         static async Task upload(Element element)
         {
-            string path = userdir + element.realpath + element.filename;
+            string path = userdir + element.parent + element.filename;
             if (Directory.Exists(path) || !File.Exists(path))
             {
                 // Don't upload empty folders or try to upload non-existing files
@@ -144,9 +144,9 @@ namespace sd_client
                 {
                     var values = new[]
                     {
-                        new KeyValuePair<string, string>("file", currDir),
+                        new KeyValuePair<string, string>("target", currDir),
                         new KeyValuePair<string, string>("action", "upload"),
-                        new KeyValuePair<string, string>("paths", element.realpath),
+                        new KeyValuePair<string, string>("paths", element.parent),
                     };
 
                     foreach (var keyValuePair in values)
@@ -173,7 +173,7 @@ namespace sd_client
 
             if (element.type == "folder")
             {
-                Directory.CreateDirectory(userdir + element.realpath + element.filename);
+                Directory.CreateDirectory(userdir + element.parent + element.filename);
                 return;
             }
 
@@ -184,12 +184,12 @@ namespace sd_client
                     {
                         { "action", "download" },
                         { "source", json },
-                        { "file", currDir }
+                        { "target", currDir }
                     };
                 var content = new FormUrlEncodedContent(values);
                 HttpResponseMessage response = await client.PostAsync("http://" + server + "/php/files_api.php", content);
 
-                using (FileStream fs = new FileStream(userdir + element.realpath + element.filename, FileMode.Create, FileAccess.Write, FileShare.None))
+                using (FileStream fs = new FileStream(userdir + element.parent + element.filename, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     await response.Content.CopyToAsync(fs);
                 }
