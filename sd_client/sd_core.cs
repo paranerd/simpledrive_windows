@@ -15,8 +15,10 @@ namespace sd_client
     {
         public string filename { get; set; }
         public string parent { get; set; }
+        public string path { get; set; }
         public string type { get; set; }
         public string owner { get; set; }
+        public string rootshare { get; set; }
         public string action { get; set; }
     }
 
@@ -57,7 +59,7 @@ namespace sd_client
                 string last = "" + Math.Max(access, edit);
                 string type = (Directory.Exists(file)) ? "folder" : "unknown";
 
-                json += "{\"filename\":\"" + Path.GetFileName(file) + "\",\"parent\":\"" + path_raw + "\",\"type\":\"" + type + "\",\"owner\":\"" + username + "\",\"md5\":\"" + md5 + "\",\"edit\":\"" + last + "\"},";
+                json += "{\"filename\":\"" + Path.GetFileName(file) + "\",\"parent\":\"" + path_raw + "\",\"path\":\"" + path_raw + Path.GetFileName(file) + "\",\"type\":\"" + type + "\",\"owner\":\"" + username + "\",\"md5\":\"" + md5 + "\",\"edit\":\"" + last + "\",\"rootshare\":\"" + null + "\"},";
                 if (Directory.Exists(file))
                 {
                     json += list_win_dir(path_raw + Path.GetFileName(file) + "/");
@@ -84,7 +86,7 @@ namespace sd_client
             }
 
             username = user;
-            currDir = "{\"filename\":\"\",\"parent\":\"\",\"type\":\"folder\",\"size\":\"\",\"owner\":\"" + user + "\",\"rootshare\":\"0\",\"hash\":\"0\"}";
+            currDir = "{\"path\":\"\",\"rootshare\":\"0\"}";
 
             if (!Directory.Exists(folder))
             {
@@ -156,7 +158,7 @@ namespace sd_client
 
                     multipartFormDataContent.Add(new ByteArrayContent(File.ReadAllBytes(path)), '"' + "0" + '"', '"' + element.filename + '"');
 
-                    var requestUri = "http://" + server + "/php/files_api.php";
+                    var requestUri = "http://" + server + "/api/files.php";
                     var result = await client.PostAsync(requestUri, multipartFormDataContent);
                 }
             }
@@ -187,7 +189,7 @@ namespace sd_client
                         { "target", currDir }
                     };
                 var content = new FormUrlEncodedContent(values);
-                HttpResponseMessage response = await client.PostAsync("http://" + server + "/php/files_api.php", content);
+                HttpResponseMessage response = await client.PostAsync("http://" + server + "/api/files.php", content);
 
                 using (FileStream fs = new FileStream(userdir + element.parent + element.filename, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
@@ -252,11 +254,12 @@ namespace sd_client
                 var values = new Dictionary<string, string>
                     {
                         { "user", user},
-                        { "pass", pass}
+                        { "pass", pass},
+                        { "action", "login"}
                     };
                 var content = new FormUrlEncodedContent(values);
 
-                HttpResponseMessage response = client.PostAsync("http://" + server + "/php/core_login.php", content).Result;
+                HttpResponseMessage response = client.PostAsync("http://" + server + "/api/core.php", content).Result;
                 string res = response.Content.ReadAsStringAsync().Result;
                 if ((int)response.StatusCode == 404)
                 {
@@ -278,13 +281,13 @@ namespace sd_client
                 var values = new Dictionary<string, string>
                 {
                     { "action", "sync" },
-                    { "file", currDir },
+                    { "target", currDir },
                     { "source", json },
                     { "lastsync", lastsync }
                 };
 
                 var content = new FormUrlEncodedContent(values);
-                HttpResponseMessage response = client.PostAsync("http://" + server + "/php/files_api.php", content).Result;
+                HttpResponseMessage response = client.PostAsync("http://" + server + "/api/files.php", content).Result;
                 var res = response.Content.ReadAsStringAsync().Result;
                 return res;
             }
