@@ -30,6 +30,7 @@ namespace sd_client
         static string username;
         static string currDir;
         static string server;
+        static string token;
 
         static CookieContainer cookies;
         static HttpClientHandler handler;
@@ -79,12 +80,13 @@ namespace sd_client
         public static async Task<string> sync(string srv, string user, string pass, string folder, string lastsync)
         {
             server = srv;
-            string success = login(server, user, pass);
-            if (success == "" || success == null)
+            string result = login(server, user, pass);
+            if (result == null)
             {
-                return success;
+                return null;
             }
 
+            token = result;
             username = user;
             currDir = "{\"path\":\"\",\"rootshare\":\"0\"}";
 
@@ -186,6 +188,7 @@ namespace sd_client
                     {
                         { "action", "download" },
                         { "source", json },
+                        { "token", token },
                         { "target", currDir }
                     };
                 var content = new FormUrlEncodedContent(values);
@@ -255,6 +258,7 @@ namespace sd_client
                     {
                         { "user", user},
                         { "pass", pass},
+                        { "token", token },
                         { "action", "login"}
                     };
                 var content = new FormUrlEncodedContent(values);
@@ -281,6 +285,7 @@ namespace sd_client
                 var values = new Dictionary<string, string>
                 {
                     { "action", "sync" },
+                    { "token", token },
                     { "target", currDir },
                     { "source", json },
                     { "lastsync", lastsync }
