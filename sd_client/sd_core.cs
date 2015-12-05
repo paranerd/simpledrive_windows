@@ -22,6 +22,12 @@ namespace sd_client
         public string action { get; set; }
     }
 
+    public class Response
+    {
+        public string status { get; set; }
+        public string msg { get; set; }
+    }
+
     public class simpledrive
     {
         [DllImport("kernel32.dll")]
@@ -86,7 +92,10 @@ namespace sd_client
                 return null;
             }
 
-            token = result;
+            JavaScriptSerializer jss = new JavaScriptSerializer();
+            Response res = jss.Deserialize<Response>(result);
+
+            token = res.msg;
             username = user;
             currDir = "{\"path\":\"\",\"rootshare\":\"0\"}";
 
@@ -151,6 +160,7 @@ namespace sd_client
                         new KeyValuePair<string, string>("target", currDir),
                         new KeyValuePair<string, string>("action", "upload"),
                         new KeyValuePair<string, string>("paths", element.parent),
+                        new KeyValuePair<string, string>("token", token),
                     };
 
                     foreach (var keyValuePair in values)

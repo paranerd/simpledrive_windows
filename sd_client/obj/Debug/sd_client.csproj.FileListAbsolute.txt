@@ -15,4 +15,3 @@ C:\Users\paranerd\Documents\Visual Studio 2015\Projects\simpledrive_windows\sd_c
 C:\Users\paranerd\Documents\Visual Studio 2015\Projects\simpledrive_windows\sd_client\obj\Debug\sd_client.csproj.GenerateResource.Cache
 C:\Users\paranerd\Documents\Visual Studio 2015\Projects\simpledrive_windows\sd_client\obj\Debug\sd_client.exe
 C:\Users\paranerd\Documents\Visual Studio 2015\Projects\simpledrive_windows\sd_client\obj\Debug\sd_client.pdb
-C:\Users\paranerd\Documents\Visual Studio 2015\Projects\simpledrive_windows\sd_client\obj\Debug\sd_client.csprojResolveAssemblyReference.cache
