@@ -16,18 +16,18 @@
         "Entry"
         {
         "MsmKey" = "8:_408E31BB65203F9D666B603CD180F969"
-        "OwnerKey" = "8:_B79713C2B293478CA1D5B74C391D1922"
+        "OwnerKey" = "8:_E06E3320D96E415584F670CDC4D76831"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_B79713C2B293478CA1D5B74C391D1922"
+        "MsmKey" = "8:_BEF351C45C064E418FC4DA520CC90CB3"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_F4A115BABE0649399B19304A85983AC5"
+        "MsmKey" = "8:_E06E3320D96E415584F670CDC4D76831"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -40,7 +40,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_B79713C2B293478CA1D5B74C391D1922"
+        "OwnerKey" = "8:_E06E3320D96E415584F670CDC4D76831"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -51,7 +51,7 @@
         "DisplayName" = "8:Debug"
         "IsDebugOnly" = "11:TRUE"
         "IsReleaseOnly" = "11:FALSE"
-        "OutputFilename" = "8:Debug\\sd_setup.msi"
+        "OutputFilename" = "8:Debug\\simpledrive.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -61,6 +61,22 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.5"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.5 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.5"
+                    }
+                }
+            }
         }
         "Release"
         {
@@ -77,6 +93,22 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.5"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.5 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.5"
+                    }
+                }
+            }
         }
     }
     "Deployable"
@@ -137,9 +169,9 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_F4A115BABE0649399B19304A85983AC5"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_BEF351C45C064E418FC4DA520CC90CB3"
             {
-            "SourcePath" = "8:..\\..\\..\\..\\server\\simpledrive\\favicon.ico"
+            "SourcePath" = "8:favicon.ico"
             "TargetName" = "8:favicon.ico"
             "Tag" = "8:"
             "Folder" = "8:_04B224A1E3AC468BA95E69D9E7ECED28"
@@ -224,15 +256,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:simpleDrive Sync Client"
-        "ProductCode" = "8:{126ADA9F-7ADD-43F1-8796-BF6DB04EFED7}"
-        "PackageCode" = "8:{6B829561-B303-4733-BE16-76E75C195BC6}"
+        "ProductCode" = "8:{6B78A82D-6368-43BC-8C50-29E934FF8F31}"
+        "PackageCode" = "8:{514FAD28-BAAB-4071-8992-A2CE1740CD94}"
         "UpgradeCode" = "8:{381509B9-9B9C-4F75-8CC3-34EA3B92827E}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.0.0"
+        "ProductVersion" = "8:1.0.1"
         "Manufacturer" = "8:paranerd"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -241,7 +273,7 @@
         "ARPCONTACT" = "8:paranerd"
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:"
-        "ARPURLINFOABOUT" = "8:"
+        "ARPURLINFOABOUT" = "8:www.simpledrive.org"
         "ARPPRODUCTICON" = "8:"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
@@ -345,7 +377,7 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_1892263CBCA24B2DBEA7ED63AD24C54C"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_A9FF7101226F4EF08F63302D8EB16274"
             {
             "Name" = "8:simpleDrive Sync Client"
             "Arguments" = "8:"
@@ -353,24 +385,24 @@
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_B79713C2B293478CA1D5B74C391D1922"
-            "Folder" = "8:_04B224A1E3AC468BA95E69D9E7ECED28"
-            "WorkingFolder" = "8:_04B224A1E3AC468BA95E69D9E7ECED28"
-            "Icon" = "8:_F4A115BABE0649399B19304A85983AC5"
-            "Feature" = "8:"
-            }
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_70362F7BABB845E68D0EEB6AF57DD8D1"
-            {
-            "Name" = "8:simpleDrive Sync Client"
-            "Arguments" = "8:"
-            "Description" = "8:"
-            "ShowCmd" = "3:1"
-            "IconIndex" = "3:0"
-            "Transitive" = "11:FALSE"
-            "Target" = "8:_B79713C2B293478CA1D5B74C391D1922"
+            "Target" = "8:_E06E3320D96E415584F670CDC4D76831"
             "Folder" = "8:_D7F46608370242AEA4F5FCCF4011E8F8"
             "WorkingFolder" = "8:_04B224A1E3AC468BA95E69D9E7ECED28"
-            "Icon" = "8:_F4A115BABE0649399B19304A85983AC5"
+            "Icon" = "8:_BEF351C45C064E418FC4DA520CC90CB3"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_D0A88474435C4979BF3474F44CE1A610"
+            {
+            "Name" = "8:simpleDrive Sync Client"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_E06E3320D96E415584F670CDC4D76831"
+            "Folder" = "8:_04B224A1E3AC468BA95E69D9E7ECED28"
+            "WorkingFolder" = "8:_04B224A1E3AC468BA95E69D9E7ECED28"
+            "Icon" = "8:_BEF351C45C064E418FC4DA520CC90CB3"
             "Feature" = "8:"
             }
         }
@@ -772,7 +804,7 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B79713C2B293478CA1D5B74C391D1922"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_E06E3320D96E415584F670CDC4D76831"
             {
             "SourcePath" = "8:..\\sd_client\\obj\\Debug\\sd_client.exe"
             "TargetName" = "8:"

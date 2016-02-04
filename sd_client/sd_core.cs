@@ -158,7 +158,6 @@ namespace sd_client
                     var values = new[]
                     {
                         new KeyValuePair<string, string>("target", currDir),
-                        new KeyValuePair<string, string>("action", "upload"),
                         new KeyValuePair<string, string>("paths", element.parent),
                         new KeyValuePair<string, string>("token", token),
                     };
@@ -170,7 +169,7 @@ namespace sd_client
 
                     multipartFormDataContent.Add(new ByteArrayContent(File.ReadAllBytes(path)), '"' + "0" + '"', '"' + element.filename + '"');
 
-                    var requestUri = "http://" + server + "/api/files.php";
+                    var requestUri = "http://" + server + "/api/files/upload";
                     var result = await client.PostAsync(requestUri, multipartFormDataContent);
                 }
             }
@@ -196,13 +195,12 @@ namespace sd_client
                 HttpClient client = new HttpClient(handler as HttpMessageHandler);
                 var values = new Dictionary<string, string>
                     {
-                        { "action", "download" },
                         { "source", json },
                         { "token", token },
                         { "target", currDir }
                     };
                 var content = new FormUrlEncodedContent(values);
-                HttpResponseMessage response = await client.PostAsync("http://" + server + "/api/files.php", content);
+                HttpResponseMessage response = await client.PostAsync("http://" + server + "/api/files/download", content);
 
                 using (FileStream fs = new FileStream(userdir + element.parent + element.filename, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
@@ -266,14 +264,13 @@ namespace sd_client
 
                 var values = new Dictionary<string, string>
                     {
-                        { "user", user},
-                        { "pass", pass},
-                        { "token", token },
-                        { "action", "login"}
+                        { "user", user },
+                        { "pass", pass },
+                        { "token", token }
                     };
                 var content = new FormUrlEncodedContent(values);
 
-                HttpResponseMessage response = client.PostAsync("http://" + server + "/api/core.php", content).Result;
+                HttpResponseMessage response = client.PostAsync("http://" + server + "/api/core/login", content).Result;
                 string res = response.Content.ReadAsStringAsync().Result;
                 if ((int)response.StatusCode == 404)
                 {
@@ -294,7 +291,6 @@ namespace sd_client
                 HttpClient client = new HttpClient(handler as HttpMessageHandler);
                 var values = new Dictionary<string, string>
                 {
-                    { "action", "sync" },
                     { "token", token },
                     { "target", currDir },
                     { "source", json },
@@ -302,7 +298,7 @@ namespace sd_client
                 };
 
                 var content = new FormUrlEncodedContent(values);
-                HttpResponseMessage response = client.PostAsync("http://" + server + "/api/files.php", content).Result;
+                HttpResponseMessage response = client.PostAsync("http://" + server + "/api/files/sync", content).Result;
                 var res = response.Content.ReadAsStringAsync().Result;
                 return res;
             }
