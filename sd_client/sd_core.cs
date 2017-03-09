@@ -13,12 +13,10 @@ namespace sd_client
 {
     public class Element
     {
-        public string filename { get; set; }
-        public string parent { get; set; }
+        public string id { get; set; }
         public string path { get; set; }
         public string type { get; set; }
-        public string owner { get; set; }
-        public string rootshare { get; set; }
+        public string md5 { get; set; }
         public string action { get; set; }
     }
 
@@ -26,6 +24,11 @@ namespace sd_client
     {
         public string status { get; set; }
         public string msg { get; set; }
+    }
+
+    public class NewResponse
+    {
+        public List<Element> msg { get; set; }
     }
 
     public class simpledrive
@@ -66,7 +69,7 @@ namespace sd_client
                 string last = "" + Math.Max(access, edit);
                 string type = (Directory.Exists(file)) ? "folder" : "unknown";
 
-                json += "{\"filename\":\"" + Path.GetFileName(file) + "\",\"parent\":\"" + path_raw + "\",\"path\":\"" + path_raw + Path.GetFileName(file) + "\",\"type\":\"" + type + "\",\"owner\":\"" + username + "\",\"md5\":\"" + md5 + "\",\"edit\":\"" + last + "\",\"rootshare\":\"" + null + "\"},";
+                json += "{\"path\":\"" + path_raw + Path.GetFileName(file) + "\",\"type\":\"" + type + "\",\"md5\":\"" + md5 + "\",\"edit\":\"" + last + "\"},";
                 if (Directory.Exists(file))
                 {
                     json += list_win_dir(path_raw + Path.GetFileName(file) + "/");
@@ -85,6 +88,7 @@ namespace sd_client
 
         public static async Task<string> sync(string srv, string user, string pass, string folder, string lastsync)
         {
+            MessageBox.Show("start sync?");
             server = srv;
             string result = login(server, user, pass);
             if (result == null)
@@ -97,7 +101,7 @@ namespace sd_client
 
             token = res.msg;
             username = user;
-            currDir = "{\"path\":\"\",\"rootshare\":\"0\"}";
+            currDir = "0";
 
             if (!Directory.Exists(folder))
             {
@@ -107,21 +111,31 @@ namespace sd_client
 
             string all_elem = get_all_elements();
             string files_to_download = get_files_to_sync(all_elem, lastsync);
-            //MessageBox.Show("files_to_download: " + files_to_download);
+
+            MessageBox.Show("res: " + files_to_download);
 
             JavaScriptSerializer ser = new JavaScriptSerializer();
             List<Element> dl_elements = ser.Deserialize<List<Element>>(files_to_download);
-            foreach (Element elem in dl_elements)
+            NewResponse dl_test = ser.Deserialize<NewResponse>(files_to_download);
+
+            if (dl_test.msg == null)
             {
-                if(elem.action == "download")
+                return null;
+            }
+
+            foreach (Element elem in dl_test.msg)
+            {
+                MessageBox.Show(elem.action + " " + elem.path);
+
+                if (elem.action == "download")
                 {
                     await download(elem);
                 }
-                else if(elem.action == "upload")
+                else if (elem.action == "upload")
                 {
                     await upload(elem);
                 }
-                else if(elem.action == "delete")
+                else if (elem.action == "delete")
                 {
                     delete(elem);
                 }
@@ -131,7 +145,7 @@ namespace sd_client
 
         static void delete(Element element)
         {
-            string path = userdir + element.parent + element.filename;
+            string path = userdir + element.path;
             if (File.Exists(path))
             {
                 File.Delete(path);
@@ -144,7 +158,10 @@ namespace sd_client
 
         static async Task upload(Element element)
         {
-            string path = userdir + element.parent + element.filename;
+            string path = userdir + element.path;
+            string parent = Directory.GetParent(path).FullName;
+            string relative_parent = parent.Substring(userdir.Length);
+            relative_parent = relative_parent.Replace("\\", "/");
             if (Directory.Exists(path) || !File.Exists(path))
             {
                 // Don't upload empty folders or try to upload non-existing files
@@ -158,7 +175,7 @@ namespace sd_client
                     var values = new[]
                     {
                         new KeyValuePair<string, string>("target", currDir),
-                        new KeyValuePair<string, string>("paths", element.parent),
+                        new KeyValuePair<string, string>("paths", relative_parent),
                         new KeyValuePair<string, string>("token", token),
                     };
 
@@ -167,7 +184,7 @@ namespace sd_client
                         multipartFormDataContent.Add(new StringContent(keyValuePair.Value), String.Format("\"{0}\"", keyValuePair.Key));
                     }
 
-                    multipartFormDataContent.Add(new ByteArrayContent(File.ReadAllBytes(path)), '"' + "0" + '"', '"' + element.filename + '"');
+                    multipartFormDataContent.Add(new ByteArrayContent(File.ReadAllBytes(path)), '"' + "0" + '"', '"' + Path.GetFileName(element.path) + '"');
 
                     var requestUri = "http://" + server + "/api/files/upload";
                     var result = await client.PostAsync(requestUri, multipartFormDataContent);
@@ -179,14 +196,27 @@ namespace sd_client
             }
         }
 
+        private static bool createFolderIfNeeded(string path)
+        {
+            string parent = Directory.GetParent(path).FullName;
+
+            if (!Directory.Exists(parent))
+            {
+                Directory.CreateDirectory(parent);
+            }
+
+            return Directory.Exists(parent);
+        }
+
         public static async Task download(Element element)
         {
+            createFolderIfNeeded(userdir + element.path);
             JavaScriptSerializer ser = new JavaScriptSerializer();
-            string json = "[" + ser.Serialize(element) + "]";
+            string json = "[" + ser.Serialize(element.id) + "]";
 
             if (element.type == "folder")
             {
-                Directory.CreateDirectory(userdir + element.parent + element.filename);
+                Directory.CreateDirectory(userdir + element.path);
                 return;
             }
 
@@ -195,14 +225,13 @@ namespace sd_client
                 HttpClient client = new HttpClient(handler as HttpMessageHandler);
                 var values = new Dictionary<string, string>
                     {
-                        { "source", json },
                         { "token", token },
-                        { "target", currDir }
+                        { "target", json }
                     };
                 var content = new FormUrlEncodedContent(values);
-                HttpResponseMessage response = await client.PostAsync("http://" + server + "/api/files/download", content);
+                HttpResponseMessage response = await client.PostAsync("http://" + server + "/api/files/get", content);
 
-                using (FileStream fs = new FileStream(userdir + element.parent + element.filename, FileMode.Create, FileAccess.Write, FileShare.None))
+                using (FileStream fs = new FileStream(userdir + element.path, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     await response.Content.CopyToAsync(fs);
                 }
@@ -292,7 +321,7 @@ namespace sd_client
                 var values = new Dictionary<string, string>
                 {
                     { "token", token },
-                    { "target", currDir },
+                    { "target", "0" },
                     { "source", json },
                     { "lastsync", lastsync }
                 };
@@ -300,7 +329,7 @@ namespace sd_client
                 var content = new FormUrlEncodedContent(values);
                 HttpResponseMessage response = client.PostAsync("http://" + server + "/api/files/sync", content).Result;
                 var res = response.Content.ReadAsStringAsync().Result;
-                return res;
+                return res; //.Substring(1, res.Length - 1);
             }
             catch (Exception exp)
             {

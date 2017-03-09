@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.Configuration;
 using System.IO;
 using System.Diagnostics;
+using System.Web.Script.Serialization;
 
 namespace sd_client
 {
@@ -186,12 +187,18 @@ namespace sd_client
                 blockText(true);
                 status.Text = "Connecting...";
                 string login = simpledrive.login(server_input.Text, user_input.Text, pass_input.Text);
+
+                JavaScriptSerializer jss = new JavaScriptSerializer();
+                Response res = jss.Deserialize<Response>(login);
+
+                String token = res.msg;
+
                 if (login == null)
                 {
                     status.Text = "Connection error";
                     blockText(false);
                 }
-                else if (login == "1")
+                else if (res.msg != null)
                 {
                     var settings = new Dictionary<string, string>
                     {
